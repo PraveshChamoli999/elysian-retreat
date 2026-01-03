@@ -1,51 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [cursorType, setCursorType] = useState('default');
-  
+  const [cursorType, setCursorType] = useState("default");
+  const [isDesktop, setIsDesktop] = useState(false);
+
   useEffect(() => {
+    const checkDevice = () => {
+      const hasTouch =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      setIsDesktop(!hasTouch && window.innerWidth > 768);
+    };
+
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) return;
+
     const updateMousePosition = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    
-    document.addEventListener('mousemove', updateMousePosition);
-    
-    const interactiveElements = document.querySelectorAll('button, a, .card-3d, .hover-lift');
-    
-    interactiveElements.forEach(el => {
-      el.addEventListener('mouseenter', () => setCursorType('hover'));
-      el.addEventListener('mouseleave', () => setCursorType('default'));
+
+    document.addEventListener("mousemove", updateMousePosition);
+
+    const handleEnter = () => setCursorType("hover");
+    const handleLeave = () => setCursorType("default");
+
+    const elements = document.querySelectorAll(
+      "button, a, .card-3d, .hover-lift"
+    );
+
+    elements.forEach((el) => {
+      el.addEventListener("mouseenter", handleEnter);
+      el.addEventListener("mouseleave", handleLeave);
     });
-    
+
     return () => {
-      document.removeEventListener('mousemove', updateMousePosition);
-      
-      interactiveElements.forEach(el => {
-        el.removeEventListener('mouseenter', () => setCursorType('hover'));
-        el.removeEventListener('mouseleave', () => setCursorType('default'));
+      document.removeEventListener("mousemove", updateMousePosition);
+      elements.forEach((el) => {
+        el.removeEventListener("mouseenter", handleEnter);
+        el.removeEventListener("mouseleave", handleLeave);
       });
     };
-  }, []);
-  
+  }, [isDesktop]);
+
+  if (!isDesktop) return null;
+
   return (
     <>
-      <div 
+      <div
         className="custom-cursor"
         style={{
-          left: `${mousePosition.x}px`,
-          top: `${mousePosition.y}px`,
-          transform: `translate(-50%, -50%) scale(${cursorType === 'hover' ? 1.5 : 1})`,
-          borderColor: cursorType === 'hover' ? '#30e88c' : '#30e88c'
+          left: mousePosition.x,
+          top: mousePosition.y,
         }}
-      ></div>
-      <div 
+      />
+      <div
         className="cursor-dot"
         style={{
-          left: `${mousePosition.x}px`,
-          top: `${mousePosition.y}px`,
+          left: mousePosition.x,
+          top: mousePosition.y,
         }}
-      ></div>
+      />
     </>
   );
 };

@@ -342,3 +342,13 @@ body {
   mix-blend-mode: difference;
   transform: translate(-50%, -50%);
 }
+/* =======================================================
+   HIDE SYSTEM CURSOR — DESKTOP ONLY
+   ======================================================= */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  * {
+    cursor: none !important;
+  }
+}
